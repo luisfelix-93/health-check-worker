@@ -1,7 +1,7 @@
 # ---- Estágio de Build ----
 # Usamos uma imagem Node.js como base para construir a aplicação.
 # A tag 'builder' nos permite referenciar este estágio posteriormente.
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Define o diretório de trabalho dentro do container
 WORKDIR /usr/src/app
@@ -21,7 +21,7 @@ RUN npm run build
 
 # ---- Estágio de Produção ----
 # Começamos com uma imagem Node.js limpa e leve para a versão final
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /usr/src/app
 
