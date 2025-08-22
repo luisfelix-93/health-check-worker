@@ -2,31 +2,33 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { executeHealthCheck } from './checkExecutor.service';
 
-// Mock performance.now() para controlar o responseTimeInMs de forma determinística
-const mockPerformanceNow = jest.spyOn(performance, 'now');
+// Mock performance.now() to control responseTimeInMs deterministically
+// We can't use jest.spyOn directly on performance.now because it's a read-only property.
+// Instead, we can mock the implementation.
+const mockPerformanceNow = jest.fn();
+global.performance.now = mockPerformanceNow;
 
 describe('executeHealthCheck', () => {
     let mock: MockAdapter;
 
     beforeEach(() => {
-        // Cria um novo mock adapter para cada teste
+        // Create a new mock adapter for each test
         mock = new MockAdapter(axios);
-        // Limpa os mocks antes de cada teste
+        // Clear the mock before each test
         mockPerformanceNow.mockClear();
     });
 
     afterEach(() => {
-        // Restaura a implementação original
+        // Restore the original implementation
         mock.restore();
     });
 
-    it('deve retornar um status Online para uma requisição bem-sucedida', async () => {
+    it('should return Online status for a successful request', async () => {
         const url = 'https://example.com';
         mock.onGet(url).reply(200, { message: 'OK' });
 
-        // Simula a passagem do tempo
-        let time = 1000;
-        mockPerformanceNow.mockImplementation(() => time += 50); // startTime = 1000, endTime = 1050
+        // Simulate time passing
+        mockPerformanceNow.mockReturnValueOnce(1000).mockReturnValueOnce(1050); // startTime = 1000, endTime = 1050
 
         const result = await executeHealthCheck(url);
 
@@ -37,13 +39,12 @@ describe('executeHealthCheck', () => {
         expect(result.error).toBeUndefined();
     });
 
-    it('deve retornar um status Offline para uma requisição que falhou (ex: 404)', async () => {
+    it('should return Offline status for a failed request (e.g., 404)', async () => {
         const url = 'https://example.com/notfound';
         mock.onGet(url).reply(404);
 
-        // Simula a passagem do tempo
-        let time = 2000;
-        mockPerformanceNow.mockImplementation(() => time += 75); // startTime = 2000, endTime = 2075
+        // Simulate time passing
+        mockPerformanceNow.mockReturnValueOnce(2000).mockReturnValueOnce(2075); // startTime = 2000, endTime = 2075
 
         const result = await executeHealthCheck(url);
 
@@ -54,13 +55,12 @@ describe('executeHealthCheck', () => {
         expect(result.error).toBe('Request failed with status code 404');
     });
 
-    it('deve retornar um status Offline para um erro de rede', async () => {
+    it('should return Offline status for a network error', async () => {
         const url = 'https://example.com/network-error';
         mock.onGet(url).networkError();
 
-        // Simula a passagem do tempo
-        let time = 3000;
-        mockPerformanceNow.mockImplementation(() => time += 100);
+        // Simulate time passing
+        mockPerformanceNow.mockReturnValueOnce(3000).mockReturnValueOnce(3100);
 
         const result = await executeHealthCheck(url);
 
@@ -71,13 +71,12 @@ describe('executeHealthCheck', () => {
         expect(result.error).toBe('Network Error');
     });
 
-    it('deve retornar um status Offline para um timeout', async () => {
+    it('should return Offline status for a timeout', async () => {
         const url = 'https://example.com/timeout';
         mock.onGet(url).timeout();
 
-        // Simula a passagem do tempo
-        let time = 4000;
-        mockPerformanceNow.mockImplementation(() => time += 120);
+        // Simulate time passing
+        mockPerformanceNow.mockReturnValueOnce(4000).mockReturnValueOnce(4120);
 
         const result = await executeHealthCheck(url);
 
@@ -88,4 +87,3 @@ describe('executeHealthCheck', () => {
         expect(result.error).toBe('timeout of 10000ms exceeded');
     });
 });
-
