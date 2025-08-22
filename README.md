@@ -1,5 +1,41 @@
 # Health Check Worker
 
+Este worker é responsável por processar jobs de health check de uma fila, executar os testes de saúde (como resolução de DNS, requisições HTTP, etc.) e enviar os resultados para outra fila.
+
+## Como Iniciar
+
+1. **Instale as dependências:**
+   ```bash
+   npm install
+   ```
+
+2. **Inicie o worker em modo de desenvolvimento:**
+   ```bash
+   npm run dev
+   ```
+
+## Rodando os Testes
+
+O projeto utiliza [Jest](https://jestjs.io/) para os testes unitários e de integração.
+
+Para rodar a suíte de testes, execute o seguinte comando:
+
+```bash
+npm test
+```
+
+## Estrutura do Projeto
+
+- `src/`
+  - `config/`: Configurações (ex: conexão com Redis).
+  - `jobs/`: Definição das filas (BullMQ) e processadores de jobs.
+  - `services/`: Lógica de negócio, como a execução dos health checks.
+  - `index.ts`: Ponto de entrada da aplicação.
+- `dockerfile`: Definição do container Docker para o worker.
+- `jest.config.js`: Configuração do Jest.
+- `tsconfig.json`: Configuração do TypeScript.
+
+
 Este projeto contém um worker responsável por processar jobs de uma fila para realizar checagens de saúde (health checks) em URLs especificadas.
 
 ## Sobre o Projeto
@@ -29,7 +65,7 @@ Para executar este projeto localmente, siga os passos abaixo.
 
 1.  Clone o repositório:
     ```sh
-    git clone <url-do-seu-repositorio>
+    git clone https://github.com/luisfelix-93/health-check-worker
     ```
 2.  Navegue até o diretório do projeto:
     ```sh
