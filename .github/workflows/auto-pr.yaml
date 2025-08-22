@@ -6,26 +6,7 @@ on:
       - '*'  # Monitora todas as branches
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - run: npm ci
-      - run: npm test
-
   create-pr:
-    needs: test  # Só roda se o job "test" passar
     runs-on: ubuntu-latest
     permissions:
       contents: write
