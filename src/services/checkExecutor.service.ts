@@ -4,6 +4,7 @@ import { AxiosError } from "axios";
 interface HealthCheckResult {
     url: string;
     status: 'Online' | 'Offline';
+    data?: any;
     statusCode: number | null;
     responseTimeInMs: number;
     error?: string;
@@ -18,6 +19,7 @@ export async function executeHealthCheck(url:string): Promise<HealthCheckResult>
         return {
             url,
             status: 'Online',
+            data: response.data,
             statusCode: response.status,
             responseTimeInMs: Math.round(endTime - startTime),
         };
